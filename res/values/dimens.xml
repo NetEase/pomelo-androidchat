@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <dimen name="tx_width">300px</dimen>
+    <dimen name="tx_height">35px</dimen>
+    <dimen name="chat_height">300dp</dimen>
+    <dimen name="error_width">260dp</dimen>
+    <dimen name="error_height">50dp</dimen>
+    <dimen name="bar_padding">10dp</dimen>
+    <dimen name="join_height">30dp</dimen>
+    <dimen name="join_weight">75dp</dimen>
+    <dimen name="padding_bottom">5dp</dimen>
+
+</resources>

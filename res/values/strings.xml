@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">pomelo-chat</string>
+    <string name="app">ChatApplication</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="menu_settings">Settings</string>
+    <string name="button">send</string>
+    <string name="avatar">avatar</string>
+    <string name="cast">cast</string>
+    <string name="loginBtn">Join</string>
+    <string name="logOutBtn">quit</string>
+    <string name="refreshBtn">refresh</string>
+    <string name="name_hint">enter your name</string>
+    <string name="channel_hint">create channel</string>
+
+</resources>
