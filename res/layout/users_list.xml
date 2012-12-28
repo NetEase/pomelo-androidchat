@@ -14,14 +14,4 @@
 
     </ListView>
 
-    <Button
-        android:id="@+id/refresh"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="right"
-        android:minHeight="40dip"
-        android:minWidth="75dp"
-        android:paddingBottom="@dimen/padding_bottom"
-        android:text="@string/refreshBtn" />
-
 </LinearLayout>

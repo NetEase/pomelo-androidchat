@@ -1,7 +1,7 @@
 package netease.pomelo.chat;
 
-import com.netease.pomelo.PomeloClient;
 
+import com.netease.pomelo.PomeloClient;
 import android.app.Application;
 
 public class ChatApplication extends Application {

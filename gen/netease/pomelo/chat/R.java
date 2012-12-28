@@ -39,11 +39,10 @@ public final class R {
         public static final int channel=0x7f080001;
         public static final int entry=0x7f080009;
         public static final int error=0x7f080003;
-        public static final int exit=0x7f080011;
+        public static final int exit=0x7f080010;
         public static final int history=0x7f080007;
         public static final int login=0x7f080002;
         public static final int name=0x7f080000;
-        public static final int refresh=0x7f080010;
         public static final int send=0x7f08000a;
         public static final int userList=0x7f08000f;
     }

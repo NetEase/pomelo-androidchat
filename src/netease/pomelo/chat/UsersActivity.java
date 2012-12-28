@@ -2,13 +2,11 @@ package netease.pomelo.chat;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import com.netease.pomelo.DataCallBack;
+import com.netease.pomelo.DataEvent;
+import com.netease.pomelo.DataListener;
 import com.netease.pomelo.PomeloClient;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
@@ -20,22 +18,20 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.Button;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
+import android.widget.TextView;
 
-public class UsersActivity extends Activity implements OnItemClickListener,
-		OnClickListener {
+public class UsersActivity extends Activity implements OnItemClickListener {
 
 	private PomeloClient client;
+	private SimpleAdapter adapter;
 	private String[] users;
-	private String rid;
-	private Button refresh;
 	private ChatApplication chatApp;
 	private ListView list;
+	private ArrayList<HashMap<String, String>> userlist;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -43,18 +39,47 @@ public class UsersActivity extends Activity implements OnItemClickListener,
 		setContentView(R.layout.users_list);
 
 		list = (ListView) findViewById(R.id.userList);
-		refresh = (Button) findViewById(R.id.refresh);
-		refresh.setOnClickListener(this);
+		chatApp = (ChatApplication) getApplication();
+		client = chatApp.getClient();
 
 		// get parameters
 		Bundle bundle = this.getIntent().getExtras();
 		users = bundle.getStringArray("users");
 
-		chatApp = (ChatApplication) getApplication();
-		client = chatApp.getClient();
-		rid = chatApp.getRid();
+		initUserList();
+		onUpdateUserList();
+	}
 
-		updateUsers(users);
+	private void onUpdateUserList() {
+		client.on("onAdd", new DataListener() {
+			@Override
+			public void receiveData(DataEvent event) {
+				updateItem(event, 0);
+			}
+		});
+		client.on("onLeave", new DataListener() {
+			@Override
+			public void receiveData(DataEvent event) {
+				updateItem(event, -1);
+			}
+		});
+	}
+
+	private void updateItem(DataEvent event, int flag) {
+		JSONObject msg = event.getMessage();
+		try {
+			String user = msg.getString("user");
+			HashMap<String, String> map = new HashMap<String, String>();
+			map.put("ItemTitle", user);
+			map.put("ItemText", "online user");
+			if (flag == 0)
+				userlist.add(map);
+			else
+				userlist.remove(map);
+			myHandler.sendMessage(myHandler.obtainMessage());
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
@@ -64,8 +89,10 @@ public class UsersActivity extends Activity implements OnItemClickListener,
 	}
 
 	@Override
-	public void onItemClick(AdapterView<?> arg0, View v, int index, long arg3) {
-		chatApp.setUser(users[index]);
+	public void onItemClick(AdapterView<?> view, View v, int index, long lg) {
+		TextView item = (TextView) v.findViewById(R.id.ItemTitle);
+		String user = item.getText().toString();
+		chatApp.setUser(user.equals("all") ? "*" : user);
 		Intent intent = new Intent(getApplicationContext(), ChatActivity.class);
 		startActivity(intent);
 	}
@@ -107,35 +134,8 @@ public class UsersActivity extends Activity implements OnItemClickListener,
 		System.exit(0);
 	}
 
-	@Override
-	public void onClick(View v) {
-		JSONObject msg = new JSONObject();
-		try {
-			msg.put("rid", rid);
-		} catch (JSONException ex) {
-			ex.printStackTrace();
-		}
-		client.request("chat.chatHandler.getUsers", msg, new DataCallBack() {
-			@Override
-			public void responseData(JSONObject msg) {
-				JSONArray jr;
-				try {
-					jr = msg.getJSONArray("users");
-					users = new String[jr.length() + 1];
-					users[0] = "*";
-					for (int i = 1; i <= jr.length(); i++) {
-						users[i] = jr.getString(i - 1);
-					}
-				} catch (JSONException e) {
-					e.printStackTrace();
-				}
-				myHandler.sendMessage(myHandler.obtainMessage());
-			}
-		});
-	}
-
-	private void updateUsers(String[] users) {
-		ArrayList<HashMap<String, String>> mylist = new ArrayList<HashMap<String, String>>();
+	private void initUserList() {
+		userlist = new ArrayList<HashMap<String, String>>();
 		HashMap<String, String> map;
 		for (String user : users) {
 			map = new HashMap<String, String>();
@@ -144,12 +144,12 @@ public class UsersActivity extends Activity implements OnItemClickListener,
 			else
 				map.put("ItemTitle", user);
 			map.put("ItemText", "online user");
-			mylist.add(map);
+			userlist.add(map);
 		}
-		SimpleAdapter mSchedule = new SimpleAdapter(this, mylist,
-				R.layout.list_item, new String[] { "ItemTitle", "ItemText" },
-				new int[] { R.id.ItemTitle, R.id.ItemText });
-		list.setAdapter(mSchedule);
+		adapter = new SimpleAdapter(this, userlist, R.layout.list_item,
+				new String[] { "ItemTitle", "ItemText" }, new int[] {
+						R.id.ItemTitle, R.id.ItemText });
+		list.setAdapter(adapter);
 		list.setOnItemClickListener(this);
 	}
 
@@ -168,7 +168,7 @@ public class UsersActivity extends Activity implements OnItemClickListener,
 	Handler myHandler = new Handler() {
 		public void handleMessage(android.os.Message msg) {
 			super.handleMessage(msg);
-			updateUsers(users);
+			adapter.notifyDataSetChanged();
 		};
 	};
 }

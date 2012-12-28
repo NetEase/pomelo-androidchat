@@ -7,13 +7,14 @@ import java.util.HashMap;
 import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.netease.pomelo.DataCallBack;
 import com.netease.pomelo.DataEvent;
 import com.netease.pomelo.DataListener;
 import com.netease.pomelo.PomeloClient;
-
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.AlertDialog.Builder;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
@@ -79,6 +80,50 @@ public class ChatActivity extends Activity implements OnClickListener {
 			}
 
 		});
+
+		client.on("onLeave", new DataListener() {
+			@Override
+			public void receiveData(DataEvent event) {
+				JSONObject msg = event.getMessage();
+				try {
+					String user = msg.getString("user");
+					if (target.equals(user))
+						leaveHandler.sendMessage(leaveHandler.obtainMessage());
+				} catch (JSONException e) {
+					e.printStackTrace();
+				}
+			}
+
+		});
+
+		client.on("onAdd", new DataListener() {
+			@Override
+			public void receiveData(DataEvent event) {
+				JSONObject msg = event.getMessage();
+				try {
+					String user = msg.getString("user");
+					if (target.equals(user))
+						addHandler.sendMessage(addHandler.obtainMessage());
+				} catch (JSONException e) {
+					e.printStackTrace();
+				}
+			}
+
+		});
+	}
+
+	protected void dialog() {
+		AlertDialog.Builder builder = new Builder(this);
+		builder.setMessage("The target user is not online now.");
+		builder.setTitle("Tip");
+		builder.setPositiveButton("ok",
+				new android.content.DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						dialog.dismiss();
+					}
+				});
+		builder.create().show();
 	}
 
 	@Override
@@ -136,6 +181,21 @@ public class ChatActivity extends Activity implements OnClickListener {
 		public void handleMessage(android.os.Message msg) {
 			super.handleMessage(msg);
 			addMessage(from, target, content, aim, username, flag);
+		};
+	};
+
+	Handler addHandler = new Handler() {
+		public void handleMessage(android.os.Message msg) {
+			super.handleMessage(msg);
+			sendBtn.setEnabled(true);
+		};
+	};
+
+	Handler leaveHandler = new Handler() {
+		public void handleMessage(android.os.Message msg) {
+			super.handleMessage(msg);
+			dialog();
+			sendBtn.setEnabled(false);
 		};
 	};
 }
