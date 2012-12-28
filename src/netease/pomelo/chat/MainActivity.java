@@ -86,9 +86,6 @@ public class MainActivity extends Activity implements OnClickListener {
 							client.disconnect();
 							try {
 								String ip = msg.getString("host");
-								if (ip.equals("127.0.0.1")) {
-									ip = "114.113.202.141";
-								}
 								enter(ip, msg.getInt("port"));
 							} catch (JSONException e) {
 								e.printStackTrace();
